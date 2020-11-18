@@ -1,8 +1,8 @@
 #include "BinarySearchTree.h"
 
-BSTree *tree_init(void *key, void *value, Compare compare)
+Tree_t *tree_init(void *key, void *value, Compare_f compare)
 {
-  BSTree *newNode = (BSTree *)malloc(sizeof(BSTree));
+  Tree_t *newNode = (Tree_t *)malloc(sizeof(Tree_t));
   newNode->key = key;
   newNode->value = value;
   newNode->compare = compare;
@@ -11,11 +11,16 @@ BSTree *tree_init(void *key, void *value, Compare compare)
 }
 
 //remover todos os nodes da arvore
-void tree_destroy(BSTree *bst)
+void tree_destroy(Tree_t *bst)
 {
+  if (!bst)
+    return;
+  tree_destroy(bst->left);
+  tree_destroy(bst->right);
+  free(bst);
 }
 
-BSTree *push(BSTree *bst, void *key, void *value)
+Tree_t *push(Tree_t *bst, void *key, void *value)
 {
   if (!bst) //node folha
   {
@@ -23,7 +28,7 @@ BSTree *push(BSTree *bst, void *key, void *value)
   }
   else //caso geral
   {
-    BSTree *child;
+    Tree_t *child;
     if (bst->compare(bst->key, key) == 1)
     {
       child = push(bst->left, key, value);
@@ -41,7 +46,7 @@ BSTree *push(BSTree *bst, void *key, void *value)
   }
 }
 
-BSTree *search(BSTree *bst, void *key)
+Tree_t *search(Tree_t *bst, void *key)
 {
   if (!bst)
     return NULL;
@@ -56,7 +61,7 @@ BSTree *search(BSTree *bst, void *key)
     return search(bst->right, key);
 }
 
-BSTree *max(BSTree *bst)
+Tree_t *max(Tree_t *bst)
 {
   if (!bst)
     return NULL;
@@ -64,11 +69,11 @@ BSTree *max(BSTree *bst)
   return max(bst->right) ? bst->right : bst;
 }
 
-BSTree **list(BSTree *bst, int *n)
+Tree_t **list(Tree_t *bst, int *n)
 {
   int count = 0;
   int t_s = tree_size(bst);
-  BSTree **arr = malloc(sizeof(BSTree *) * t_s);
+  Tree_t **arr = malloc(sizeof(Tree_t *) * t_s);
 
   __listR(bst, arr, &count);
   if (n)
@@ -76,12 +81,12 @@ BSTree **list(BSTree *bst, int *n)
   return arr;
 }
 
-BSTree *pop(BSTree *target)
+Tree_t *pop(Tree_t *target)
 {
-  BSTree *ret_val;
+  Tree_t *ret_val;
   if (target->right && target->left) //caso node tenha dois filhos
   {
-    BSTree *aux = max(target->left);
+    Tree_t *aux = max(target->left);
     target->key = aux->key;
     target->value = aux->value;
     if (aux->parent == target)
@@ -92,7 +97,7 @@ BSTree *pop(BSTree *target)
   }
   else if (target->right || target->left) //caso node tenha um filho
   {
-    BSTree *child = target->right ? target->right : target->left;
+    Tree_t *child = target->right ? target->right : target->left;
     child->parent = target->parent;
 
     free(target);
@@ -103,14 +108,14 @@ BSTree *pop(BSTree *target)
   return NULL;
 }
 
-int tree_size(BSTree *bst)
+int tree_size(Tree_t *bst)
 {
   if (!bst)
     return 0;
   return 1 + tree_size(bst->left) + tree_size(bst->right);
 }
 
-int tree_height(BSTree *bst)
+int tree_height(Tree_t *bst)
 {
   if (!bst)
     return -1;

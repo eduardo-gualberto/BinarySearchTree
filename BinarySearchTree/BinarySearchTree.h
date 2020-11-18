@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "Utils/Utils.h"
 
-typedef int (*Compare)(void *, void *);
+typedef int (*Compare_f)(void *, void *);
 
 typedef struct BSTree
 {
@@ -16,17 +16,17 @@ typedef struct BSTree
   void *value, *key;
   // compare returns 1 if the first argument is bigger than the second, 0 if equal
   // and -1 if lesser. it is meant to compare two keys
-  Compare compare;
-} BSTree;
+  Compare_f compare;
+} Tree_t;
 
-BSTree *tree_init(void *, void *, int (*)(void *, void *));
-void tree_destroy(BSTree *);
-BSTree *push(BSTree *, void *, void *);
-BSTree *pop(BSTree *);
-BSTree *search(BSTree *, void *);
-BSTree *max(BSTree *);
-BSTree **list(BSTree *, int *);
-int tree_size(BSTree *);
-int tree_height(BSTree *);
+Tree_t *tree_init(void *, void *, Compare_f);
+void tree_destroy(Tree_t *);
+Tree_t *push(Tree_t *, void *, void *);
+Tree_t *pop(Tree_t *);
+Tree_t *search(Tree_t *, void *);
+Tree_t *max(Tree_t *);
+Tree_t **list(Tree_t *, int *);
+int tree_size(Tree_t *);
+int tree_height(Tree_t *);
 
 #endif
