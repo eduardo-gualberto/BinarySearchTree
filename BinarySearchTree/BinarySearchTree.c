@@ -22,13 +22,13 @@ BSTree *push(BSTree *bst, void *key, void *value)
   if (!bst) //node folha
   {
     printf("test for leaf node\n");
-    return tree_init(key, value, &(bst->compare));
+    return tree_init(key, value, &bst->compare);
   }
   else //caso geral
   {
     printf("test for general, compare = %d\n", bst->compare(bst->key, key));
     BSTree *child;
-    if (bst->compare(bst->key, key))
+    if (bst->compare(bst->key, key) == 1)
     {
       child = push(bst->left, key, value);
       bst->left = child;

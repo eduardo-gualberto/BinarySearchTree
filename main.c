@@ -14,8 +14,8 @@ int main()
   int k1, v1, k2, v2;
   k1 = 4;
   v1 = 10;
-  BSTree *bst = tree_init((void *)&k1, (void *)&v1, compare_function);
-  k2 = 1;
+  BSTree *bst = tree_init((void *)&k1, (void *)&v1, &compare_function);
+  k2 = 20;
   v2 = 30;
   bst = push(bst, (void *)&k2, (void *)&v2);
 
