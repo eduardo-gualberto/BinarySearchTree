@@ -14,7 +14,6 @@ typedef struct BSTree
   struct BSTree *parent, *right, *left;
 
   void *value, *key;
-
   // compare returns 1 if the first argument is bigger than the second, 0 if equal
   // and -1 if lesser. it is meant to compare two keys
   Compare compare;

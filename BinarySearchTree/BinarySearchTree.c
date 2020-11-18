@@ -2,7 +2,6 @@
 
 BSTree *tree_init(void *key, void *value, Compare compare)
 {
-  printf("entered tree_init\n");
   BSTree *newNode = (BSTree *)malloc(sizeof(BSTree));
   newNode->key = key;
   newNode->value = value;
@@ -18,24 +17,23 @@ void tree_destroy(BSTree *bst)
 
 BSTree *push(BSTree *bst, void *key, void *value)
 {
-  printf("entered push\n");
   if (!bst) //node folha
   {
-    printf("test for leaf node\n");
-    return tree_init(key, value, &bst->compare);
+    return tree_init(key, value, NULL);
   }
   else //caso geral
   {
-    printf("test for general, compare = %d\n", bst->compare(bst->key, key));
     BSTree *child;
     if (bst->compare(bst->key, key) == 1)
     {
       child = push(bst->left, key, value);
+      child->compare = bst->compare;
       bst->left = child;
     }
     else
     {
       child = push(bst->right, key, value);
+      child->compare = bst->compare;
       bst->right = child;
     }
     child->parent = bst;
