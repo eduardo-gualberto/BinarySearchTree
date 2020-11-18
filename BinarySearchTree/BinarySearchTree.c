@@ -1,10 +1,12 @@
 #include "BinarySearchTree.h"
 
-BSTree *tree_init(int key, int value)
+BSTree *tree_init(void *key, void *value, Compare compare)
 {
+  printf("entered tree_init\n");
   BSTree *newNode = (BSTree *)malloc(sizeof(BSTree));
   newNode->key = key;
   newNode->value = value;
+  newNode->compare = compare;
   newNode->parent = newNode->right = newNode->left = NULL;
   return newNode;
 }
@@ -14,16 +16,19 @@ void tree_destroy(BSTree *bst)
 {
 }
 
-BSTree *push(BSTree *bst, int key, int value)
+BSTree *push(BSTree *bst, void *key, void *value)
 {
+  printf("entered push\n");
   if (!bst) //node folha
   {
-    return tree_init(key, value);
+    printf("test for leaf node\n");
+    return tree_init(key, value, &(bst->compare));
   }
   else //caso geral
   {
+    printf("test for general, compare = %d\n", bst->compare(bst->key, key));
     BSTree *child;
-    if (bst->key > key)
+    if (bst->compare(bst->key, key))
     {
       child = push(bst->left, key, value);
       bst->left = child;
@@ -38,14 +43,16 @@ BSTree *push(BSTree *bst, int key, int value)
   }
 }
 
-BSTree *search(BSTree *bst, int key)
+BSTree *search(BSTree *bst, void *key)
 {
-  if (bst->key == key)
-    return bst;
   if (!bst)
     return NULL;
 
-  if (bst->key > key)
+  int comp = bst->compare(bst->key, key);
+
+  if (comp == 0)
+    return bst;
+  if (comp == 1)
     return search(bst->left, key);
   else
     return search(bst->right, key);
@@ -108,7 +115,7 @@ int tree_size(BSTree *bst)
 int tree_height(BSTree *bst)
 {
   if (!bst)
-    return 0;
+    return -1;
   int hright = tree_height(bst->right);
   int hleft = tree_height(bst->left);
   return 1 + (hright > hleft ? hright : hleft);
