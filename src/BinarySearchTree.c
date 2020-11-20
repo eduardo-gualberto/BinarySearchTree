@@ -7,6 +7,7 @@ Tree_t *tree_init(void *key, void *value, Compare_f compare)
   newNode->value = value;
   newNode->compare = compare;
   newNode->parent = newNode->right = newNode->left = NULL;
+  newNode->balance = newNode->height = 0;
   return newNode;
 }
 
@@ -22,28 +23,8 @@ void tree_destroy(Tree_t *bst)
 
 Tree_t *push(Tree_t *bst, void *key, void *value)
 {
-  if (!bst) //node folha
-  {
-    return tree_init(key, value, NULL);
-  }
-  else //caso geral
-  {
-    Tree_t *child;
-    if (bst->compare(bst->key, key) == 1)
-    {
-      child = push(bst->left, key, value);
-      child->compare = bst->compare;
-      bst->left = child;
-    }
-    else
-    {
-      child = push(bst->right, key, value);
-      child->compare = bst->compare;
-      bst->right = child;
-    }
-    child->parent = bst;
-    return bst;
-  }
+  int hchange;
+  return __pushR(bst, key, value, &hchange);
 }
 
 Tree_t *search(Tree_t *bst, void *key)
@@ -122,4 +103,44 @@ int tree_height(Tree_t *bst)
   int hright = tree_height(bst->right);
   int hleft = tree_height(bst->left);
   return 1 + (hright > hleft ? hright : hleft);
+}
+
+int isAVL(Tree_t *t)
+{
+  if (!t)
+    return 1;
+  int left = isAVL(t->left);
+  int right = isAVL(t->right);
+  if (left && right)
+    return abs(tree_height(t->left) - tree_height(t->right)) <= 1;
+  else
+    return 0;
+}
+
+Tree_t *rotate(Tree_t *t, enum DIRECTION dir)
+{
+  Tree_t *aux;
+  if (dir == RIGHT)
+  {
+    if (!t->left)
+      return t;
+    aux = t->left;
+    t->left = aux->right;
+    if (aux->right)
+      aux->right->parent = t;
+    aux->right = t;
+  }
+  else if (dir == LEFT)
+  {
+    if (!t->right)
+      return t;
+    aux = t->right;
+    t->right = aux->left;
+    if (aux->left)
+      aux->left->parent = t;
+    aux->left = t;
+  }
+  aux->parent = t->parent;
+  t->parent = aux;
+  return aux;
 }
