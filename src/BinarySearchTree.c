@@ -1,13 +1,17 @@
 #include "BinarySearchTree.h"
 
-Tree_t *tree_init(void *key, void *value, Compare_f compare)
+Tree_t *tree_init(void *key, void *value, size_t ks, Compare_f compare)
 {
   Tree_t *newNode = (Tree_t *)malloc(sizeof(Tree_t));
-  newNode->key = key;
+
+  newNode->keysize = ks;
+  newNode->key = malloc(newNode->keysize);
+  memcpy(newNode->key, key, newNode->keysize);
+
   newNode->value = value;
   newNode->compare = compare;
   newNode->parent = newNode->right = newNode->left = NULL;
-  newNode->balance = newNode->height = 0;
+  newNode->balance = 0;
   return newNode;
 }
 
@@ -18,13 +22,16 @@ void tree_destroy(Tree_t *bst)
     return;
   tree_destroy(bst->left);
   tree_destroy(bst->right);
+
+  free(bst->key);
+  free(bst->value);
   free(bst);
 }
 
 Tree_t *push(Tree_t *bst, void *key, void *value)
 {
   int hchange;
-  return __pushR(bst, key, value, &hchange);
+  return __pushR(bst, key, value, bst->keysize, &hchange);
 }
 
 Tree_t *search(Tree_t *bst, void *key)
@@ -44,10 +51,10 @@ Tree_t *search(Tree_t *bst, void *key)
 
 Tree_t *max(Tree_t *bst)
 {
-  if (!bst)
-    return NULL;
-
-  return max(bst->right) ? bst->right : bst;
+  Tree_t *aux = bst;
+  while (aux->right)
+    aux = aux->right;
+  return aux;
 }
 
 Tree_t **list(Tree_t *bst, int *n)
@@ -64,29 +71,8 @@ Tree_t **list(Tree_t *bst, int *n)
 
 Tree_t *pop(Tree_t *target)
 {
-  Tree_t *ret_val;
-  if (target->right && target->left) //caso node tenha dois filhos
-  {
-    Tree_t *aux = max(target->left);
-    target->key = aux->key;
-    target->value = aux->value;
-    if (aux->parent == target)
-      aux->parent->left = pop(aux);
-    else
-      aux->parent->right = pop(aux);
-    return target;
-  }
-  else if (target->right || target->left) //caso node tenha um filho
-  {
-    Tree_t *child = target->right ? target->right : target->left;
-    child->parent = target->parent;
-
-    free(target);
-    return child;
-  }
-  //caso node não tenha filho algum
-  free(target);
-  return NULL;
+  int hchange;
+  return __popR(target, &hchange);
 }
 
 int tree_size(Tree_t *bst)

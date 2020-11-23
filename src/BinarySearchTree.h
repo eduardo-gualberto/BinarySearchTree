@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Utils/Utils.h"
+#include <string.h>
 
 enum DIRECTION
 {
@@ -17,13 +18,14 @@ typedef int (*Compare_f)(void *, void *);
 
 typedef struct BSTree
 {
-  int balance, height;
+  int balance;
   struct BSTree *parent, *right, *left;
   void *value, *key;
+  size_t keysize;
   Compare_f compare;
 } Tree_t;
 
-Tree_t *tree_init(void *, void *, Compare_f);
+Tree_t *tree_init(void *, void *, size_t, Compare_f);
 void tree_destroy(Tree_t *);
 Tree_t *push(Tree_t *, void *, void *);
 Tree_t *pop(Tree_t *);
