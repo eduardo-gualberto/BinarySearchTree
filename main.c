@@ -11,7 +11,7 @@ int main()
   Compare_f c = &compare;
   int k[] = {80, 20, 90, 10, 100, 50, 15};
   int v0 = 'A';
-  Tree_t *t = tree_init((void *)&k[0], (void *)&v0, c);
+  Tree_t *t = tree_init((void *)&k[0], (void *)&v0, sizeof(int), c);
   for (int i = 1; i < 7; i++)
   {
     char v = 'A' + i;

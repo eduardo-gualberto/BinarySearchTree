@@ -130,7 +130,6 @@ void setBalance(Tree_t *t)
   if (!t)
     return;
   t->balance = tree_height(t->right) - tree_height(t->left);
-  printf("%d's balance = %d\n", *(int *)t->key, t->balance);
   setBalance(t->left);
   setBalance(t->right);
 }

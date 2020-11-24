@@ -31,7 +31,7 @@ void tree_destroy(Tree_t *bst)
 Tree_t *tree_push(Tree_t *bst, void *key, void *value)
 {
   int hchange;
-  Tree_t *ret = __pushR(bst, key, value, &hchange);
+  Tree_t *ret = __pushR(bst, key, value, bst->keysize, &hchange);
   ret->parent = NULL;
   return ret;
 }
