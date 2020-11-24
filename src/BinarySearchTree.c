@@ -152,15 +152,6 @@ int tree_height(Tree_t *bst)
   return 1 + (left > right ? left : right);
 }
 
-int isAVL(Tree_t *t)
-{
-  if (!t)
-    return 1;
-  int left = 1 + tree_height(t->left);
-  int right = 1 + tree_height(t->right);
-  return abs(tree_height(t->left) - tree_height(t->right)) <= 1;
-}
-
 Tree_t *tree_rotate(Tree_t *t, enum DIRECTION dir)
 {
   Tree_t *aux;
