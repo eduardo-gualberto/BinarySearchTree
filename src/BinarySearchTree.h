@@ -27,6 +27,7 @@ Tree_t *tree_init(void *, void *, Compare_f);
 void tree_destroy(Tree_t *);
 Tree_t *push(Tree_t *, void *, void *);
 Tree_t *pop(Tree_t *);
+Tree_t *popR(Tree_t *);
 Tree_t *search(Tree_t *, void *);
 Tree_t *max(Tree_t *);
 Tree_t **list(Tree_t *, int *);

@@ -24,7 +24,9 @@ void tree_destroy(Tree_t *bst)
 Tree_t *push(Tree_t *bst, void *key, void *value)
 {
   int hchange;
-  return __pushR(bst, key, value, &hchange);
+  Tree_t *ret = __pushR(bst, key, value, &hchange);
+  ret->parent = NULL;
+  return ret;
 }
 
 Tree_t *search(Tree_t *bst, void *key)
@@ -44,10 +46,10 @@ Tree_t *search(Tree_t *bst, void *key)
 
 Tree_t *max(Tree_t *bst)
 {
-  if (!bst)
-    return NULL;
-
-  return max(bst->right) ? bst->right : bst;
+  Tree_t *aux = bst;
+  while (aux->right)
+    aux = aux->right;
+  return aux;
 }
 
 Tree_t **list(Tree_t *bst, int *n)
@@ -62,7 +64,17 @@ Tree_t **list(Tree_t *bst, int *n)
   return arr;
 }
 
-Tree_t *pop(Tree_t *target)
+Tree_t *pop(Tree_t *t)
+{
+  Tree_t *t_parent = t->parent;
+
+  Tree_t *new_t = popR(t);
+  new_t->parent = t_parent;
+
+  return new_t;
+}
+
+Tree_t *popR(Tree_t *target)
 {
   Tree_t *ret_val;
   if (target->right && target->left) //caso node tenha dois filhos
