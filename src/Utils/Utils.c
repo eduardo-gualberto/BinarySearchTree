@@ -43,13 +43,13 @@ Tree_t *__pushR(Tree_t *bst, void *key, void *value, int *hchange)
         {
           if (bst->left->balance == -1)
           {
-            bst = rotate(bst, RIGHT);
+            bst = tree_rotate(bst, RIGHT);
             bst->right->balance = 0;
           }
           else
           {
-            bst->left = rotate(bst->left, LEFT);
-            bst = rotate(bst, RIGHT);
+            bst->left = tree_rotate(bst->left, LEFT);
+            bst = tree_rotate(bst, RIGHT);
             if (bst->balance == 0)
             {
               bst->right->balance = bst->left->balance = 0;
@@ -91,13 +91,13 @@ Tree_t *__pushR(Tree_t *bst, void *key, void *value, int *hchange)
         {
           if (bst->right->balance == +1)
           {
-            bst = rotate(bst, LEFT);
+            bst = tree_rotate(bst, LEFT);
             bst->left->balance = 0;
           }
           else
           {
-            bst->right = rotate(bst->right, RIGHT);
-            bst = rotate(bst, LEFT);
+            bst->right = tree_rotate(bst->right, RIGHT);
+            bst = tree_rotate(bst, LEFT);
 
             if (bst->balance == 0)
             {
@@ -123,4 +123,14 @@ Tree_t *__pushR(Tree_t *bst, void *key, void *value, int *hchange)
     child->parent = bst;
     return bst;
   }
+}
+
+void setBalance(Tree_t *t)
+{
+  if (!t)
+    return;
+  t->balance = tree_height(t->right) - tree_height(t->left);
+  printf("%d's balance = %d\n", *(int *)t->key, t->balance);
+  setBalance(t->left);
+  setBalance(t->right);
 }

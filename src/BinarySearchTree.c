@@ -21,7 +21,7 @@ void tree_destroy(Tree_t *bst)
   free(bst);
 }
 
-Tree_t *push(Tree_t *bst, void *key, void *value)
+Tree_t *tree_push(Tree_t *bst, void *key, void *value)
 {
   int hchange;
   Tree_t *ret = __pushR(bst, key, value, &hchange);
@@ -29,7 +29,7 @@ Tree_t *push(Tree_t *bst, void *key, void *value)
   return ret;
 }
 
-Tree_t *search(Tree_t *bst, void *key)
+Tree_t *tree_search(Tree_t *bst, void *key)
 {
   if (!bst)
     return NULL;
@@ -39,12 +39,12 @@ Tree_t *search(Tree_t *bst, void *key)
   if (comp == 0)
     return bst;
   if (comp == 1)
-    return search(bst->left, key);
+    return tree_search(bst->left, key);
   else
-    return search(bst->right, key);
+    return tree_search(bst->right, key);
 }
 
-Tree_t *max(Tree_t *bst)
+Tree_t *tree_max(Tree_t *bst)
 {
   Tree_t *aux = bst;
   while (aux->right)
@@ -52,7 +52,7 @@ Tree_t *max(Tree_t *bst)
   return aux;
 }
 
-Tree_t **list(Tree_t *bst, int *n)
+Tree_t **tree_list(Tree_t *bst, int *n)
 {
   int count = 0;
   int t_s = tree_size(bst);
@@ -64,41 +64,67 @@ Tree_t **list(Tree_t *bst, int *n)
   return arr;
 }
 
-Tree_t *pop(Tree_t *t)
+Tree_t *tree_pop(Tree_t *t, void *key)
 {
-  Tree_t *t_parent = t->parent;
-
-  Tree_t *new_t = popR(t);
-  new_t->parent = t_parent;
-
-  return new_t;
-}
-
-Tree_t *popR(Tree_t *target)
-{
-  Tree_t *ret_val;
-  if (target->right && target->left) //caso node tenha dois filhos
+  if (!t)
+    return t;
+  int comp = t->compare(t->key, key);
+  if (comp == 1)
+    t->left = tree_pop(t->left, key);
+  else if (comp == -1)
+    t->right = tree_pop(t->right, key);
+  else
   {
-    Tree_t *aux = max(target->left);
-    target->key = aux->key;
-    target->value = aux->value;
-    if (aux->parent == target)
-      aux->parent->left = pop(aux);
-    else
-      aux->parent->right = pop(aux);
-    return target;
-  }
-  else if (target->right || target->left) //caso node tenha um filho
-  {
-    Tree_t *child = target->right ? target->right : target->left;
-    child->parent = target->parent;
+    if (t->right && t->left) //caso node tenha dois filhos
+    {
+      Tree_t *aux = tree_max(t->left);
+      t->key = aux->key;
+      t->value = aux->value;
 
-    free(target);
-    return child;
+      t->left = tree_pop(t->left, aux->key);
+    }
+    else if (t->right || t->left) //caso node tenha um filho
+    {
+      Tree_t *child = t->right ? t->right : t->left;
+      child->parent = t->parent;
+
+      *t = *child;
+      free(child);
+    }
+    else //caso node não tenha filho algum
+    {
+      Tree_t *aux = t;
+      t = NULL;
+      free(aux);
+    }
   }
-  //caso node não tenha filho algum
-  free(target);
-  return NULL;
+  if (!t)
+    return t;
+
+  int t_balance = tree_height(t->right) - tree_height(t->left),
+      l_balance = t->left ? tree_height(t->left->right) - tree_height(t->left->left) : 0,
+      r_balance = t->right ? tree_height(t->right->right) - tree_height(t->right->left) : 0;
+
+  if (t_balance < -1 && l_balance < 0) // left left
+  {
+    t = tree_rotate(t, RIGHT);
+  }
+  else if (t_balance < -1 && l_balance >= 0) // left right
+  {
+    t->left = tree_rotate(t->left, LEFT);
+    t = tree_rotate(t, RIGHT);
+  }
+  else if (t_balance > +1 && r_balance >= 0) // right right
+    t = tree_rotate(t, LEFT);
+  else if (t_balance > +1 && r_balance < 0) // right left
+  {
+    t->right = tree_rotate(t->right, RIGHT);
+    t = tree_rotate(t, LEFT);
+  }
+
+  setBalance(t);
+
+  return t;
 }
 
 int tree_size(Tree_t *bst)
@@ -112,24 +138,23 @@ int tree_height(Tree_t *bst)
 {
   if (!bst)
     return -1;
-  int hright = tree_height(bst->right);
-  int hleft = tree_height(bst->left);
-  return 1 + (hright > hleft ? hright : hleft);
+
+  int left = tree_height(bst->left);
+  int right = tree_height(bst->right);
+
+  return 1 + (left > right ? left : right);
 }
 
 int isAVL(Tree_t *t)
 {
   if (!t)
     return 1;
-  int left = isAVL(t->left);
-  int right = isAVL(t->right);
-  if (left && right)
-    return abs(tree_height(t->left) - tree_height(t->right)) <= 1;
-  else
-    return 0;
+  int left = 1 + tree_height(t->left);
+  int right = 1 + tree_height(t->right);
+  return abs(tree_height(t->left) - tree_height(t->right)) <= 1;
 }
 
-Tree_t *rotate(Tree_t *t, enum DIRECTION dir)
+Tree_t *tree_rotate(Tree_t *t, enum DIRECTION dir)
 {
   Tree_t *aux;
   if (dir == RIGHT)
@@ -156,3 +181,95 @@ Tree_t *rotate(Tree_t *t, enum DIRECTION dir)
   t->parent = aux;
   return aux;
 }
+
+/*
+if (*hchange)
+    {
+      if (target->balance == 0)
+      {
+        *hchange = 1;
+        if (side == LEFT)
+          target->balance = +1;
+        else
+          target->balance = -1;
+      }
+      else if ((target->balance == -1 && side == LEFT) || (target->balance == +1 && side == RIGHT))
+      {
+        *hchange = 1;
+        target->balance = 0;
+      }
+      else
+      {
+        if (side == LEFT)
+        {
+          if (target->right->balance == 0)
+          {
+            target = rotate(target, LEFT);
+            *hchange = 0;
+            target->balance = -1;
+            target->left->balance = +1;
+          }
+          else if (target->right->balance == +1)
+          {
+            target = rotate(target, LEFT);
+            *hchange = 1;
+            target->balance = 0;
+            target->left->balance = 0;
+          }
+          else
+          {
+            target->right = rotate(target->right, RIGHT);
+            target = rotate(target, LEFT);
+            *hchange = 1;
+            if (target->balance == -1)
+            {
+              target->left->balance = 0;   //x
+              target->right->balance = +1; //y
+            }
+            else if (target->balance == +1)
+            {
+              target->left->balance = -1; //x
+              target->right->balance = 0; //y
+            }
+            target->balance = 0;
+            *hchange = 1;
+          }
+        }
+        else if (side == RIGHT)
+        {
+          if (target->left->balance == 0)
+          {
+            target = rotate(target, RIGHT);
+            *hchange = 0;
+            target->balance = -1;
+            target->left->balance = +1;
+          }
+          else if (target->right->balance == -1)
+          {
+            target = rotate(target, RIGHT);
+            *hchange = 1;
+            target->balance = 0;
+            target->left->balance = 0;
+          }
+          else
+          {
+            target->left = rotate(target->left, LEFT);
+            target = rotate(target, RIGHT);
+            *hchange = 1;
+            if (target->balance == -1)
+            {
+              target->left->balance = 0;   //y
+              target->right->balance = +1; //x
+            }
+            else if (target->balance == +1)
+            {
+              target->left->balance = -1; //y
+              target->right->balance = 0; //x
+            }
+            target->balance = 0;
+            *hchange = 1;
+          }
+        }
+      }
+    }
+*/
